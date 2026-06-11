@@ -1,3 +1,0 @@
--- Schéma de la base DPI-IA.
--- Le schéma complet (patients, consultations, constantes, documents,
--- utilisateurs...) sera ajouté au jalon 2 (Socle DPI).

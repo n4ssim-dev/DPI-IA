@@ -1,41 +1,41 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
-
-type HealthStatus = {
-  status: string
-  db: string
-}
+import { Navigate, Route, Routes } from "react-router-dom";
+import "./App.css";
+import { Layout } from "./components/Layout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
+import LoginPage from "./pages/LoginPage";
+import PatientDetailPage from "./pages/PatientDetailPage";
+import PatientsListPage from "./pages/PatientsListPage";
 
 function App() {
-  const [health, setHealth] = useState<HealthStatus | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    fetch(`${API_URL}/health`)
-      .then((res) => res.json())
-      .then(setHealth)
-      .catch(() => setError('Impossible de joindre l\'API'))
-  }, [])
-
   return (
-    <main>
-      <h1>DPI Intelligent — NovaSanté Lab</h1>
-      <p>
-        API :{' '}
-        {error ? (
-          <strong>KO</strong>
-        ) : (
-          <strong>{health ? health.status.toUpperCase() : '...'}</strong>
-        )}
-      </p>
-      <p>
-        Base de données :{' '}
-        <strong>{health ? health.db.toUpperCase() : '...'}</strong>
-      </p>
-    </main>
-  )
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PatientsListPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/patients/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PatientDetailPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;

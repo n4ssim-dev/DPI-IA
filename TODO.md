@@ -44,31 +44,34 @@ décrite dans [SPEC.md, section 9](SPEC.md#9-organisation-docker).
 ([SPEC.md, section 7](SPEC.md#7-modèle-de-données-esquisse)) et les
 endpoints associés ([SPEC.md, section 8](SPEC.md#8-aperçu-de-lapi-fastapi)).
 
-- [ ] Modèles SQLAlchemy + migrations Alembic : `Utilisateur`, `Patient`,
+- [x] Modèles SQLAlchemy + migrations Alembic : `Utilisateur`, `Patient`,
       `Antecedent`, `TraitementEnCours`, `Consultation`, `Constante`,
-      `Document`, `SuggestionIA`
-- [ ] `db/init.sql` (schéma) et `db/seed.sql` (jeu de données fictif :
-      patients, consultations, constantes, utilisateurs)
-- [ ] Authentification JWT : `POST /auth/login`, hash des mots de passe
+      `Document`, `SuggestionIA`, `JournalAcces`
+- [x] Script de seed Python idempotent (`app/seed.py`, exécuté au démarrage
+      du backend) : jeu de données fictif (patients, consultations,
+      constantes, utilisateurs). Remplace l'approche `db/init.sql` /
+      `db/seed.sql` initialement envisagée — voir
+      [SPEC.md, section 9](SPEC.md#9-organisation-docker)
+- [x] Authentification JWT : `POST /auth/login`, hash des mots de passe
       (bcrypt), gestion des rôles (médecin / coordinateur / admin)
-- [ ] Endpoints patients : `GET /patients` (liste + recherche par nom,
-      date de naissance, n° dossier), `POST /patients`, `GET /patients/{id}`
-- [ ] Endpoint `POST /patients/{id}/consultations`
-- [ ] Endpoint `POST /patients/{id}/constantes`
-- [ ] Endpoint `POST /patients/{id}/documents` (upload, stockage sur le
+- [x] Endpoints patients : `GET /patients` (liste + recherche par nom,
+      prénom, n° dossier), `POST /patients`, `GET /patients/{id}`
+- [x] Endpoint `POST /patients/{id}/consultations`
+- [x] Endpoint `POST /patients/{id}/constantes`
+- [x] Endpoint `POST /patients/{id}/documents` (upload, stockage sur le
       volume Docker)
-- [ ] Log d'accès minimal (utilisateur, dossier consulté, horodatage)
-- [ ] Frontend : écran de connexion, liste/recherche patients, fiche
+- [x] Log d'accès minimal (utilisateur, dossier consulté, horodatage)
+- [x] Frontend : écran de connexion, liste/recherche patients, fiche
       patient (identité, antécédents, traitements, consultations,
       constantes, documents), formulaires d'ajout consultation/constantes,
       upload de documents
 
 **Critères d'acceptation**
-- Un soignant peut se connecter, rechercher un patient, consulter son
+- [x] Un soignant peut se connecter, rechercher un patient, consulter son
   dossier complet, ajouter une consultation, des constantes et un document
-- Les données du seed sont visibles dès le premier démarrage
-- Les rôles définis (médecin, coordinateur, admin) sont distingués au moins
-  pour la gestion des comptes (admin)
+- [x] Les données du seed sont visibles dès le premier démarrage
+- [x] Les rôles définis (médecin, coordinateur, admin) sont distingués au
+  moins pour la gestion des comptes (admin)
 
 **Dépendances** : Jalon 1
 

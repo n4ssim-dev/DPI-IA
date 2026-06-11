@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
-from app.config import settings
+from app.database import engine
+from app.routers import auth, patients, users
 
 app = FastAPI(title="DPI-IA API")
 
@@ -13,7 +14,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-engine = create_engine(settings.database_url)
+app.include_router(auth.router)
+app.include_router(patients.router)
+app.include_router(users.router)
 
 
 @app.get("/health")

@@ -153,13 +153,20 @@ dpi-ia/
 ├── docker-compose.yml
 ├── frontend/        # React (Vite + TS)
 │   └── Dockerfile
-├── backend/         # FastAPI
-│   ├── Dockerfile
-│   └── app/
-└── db/
-    ├── init.sql     # création du schéma
-    └── seed.sql     # patients/consultations/constantes fictifs (chargé au démarrage)
+└── backend/         # FastAPI
+    ├── Dockerfile
+    ├── entrypoint.sh   # alembic upgrade head && seed && uvicorn
+    ├── alembic/         # migrations (schéma généré depuis les modèles SQLAlchemy)
+    └── app/
+        ├── models.py    # source de vérité du schéma de données
+        └── seed.py      # jeu de données fictif (patients, consultations, constantes...),
+                          # idempotent, exécuté au démarrage du conteneur backend
 ```
+
+Le schéma de la base est géré par les migrations Alembic (générées depuis les
+modèles SQLAlchemy) et le jeu de données de démonstration par un script Python
+idempotent, plutôt que par des fichiers `db/init.sql` / `db/seed.sql` exécutés
+par l'image Postgres.
 
 ## 10. Exigences non fonctionnelles
 
