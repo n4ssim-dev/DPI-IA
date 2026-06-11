@@ -82,22 +82,25 @@ côté client, conformément à
 [SPEC.md, section 5.2](SPEC.md#52-modules-ia-rudimentaires) et
 [SPEC.md, section 13](SPEC.md#13-décisions-de-conception).
 
-- [ ] Script Python générant un dataset synthétique à partir des seuils
-      médicaux de référence (tension, fréquence cardiaque, glycémie,
-      température...)
-- [ ] Entraînement d'un petit modèle de classification et export au format
-      TensorFlow.js (< 50 Mo)
-- [ ] Intégration de `@tensorflow/tfjs` via CDN dans le frontend
-- [ ] Chargement du modèle et inférence côté client lors de la saisie /
-      affichage des constantes
-- [ ] Affichage de l'alerte avec le disclaimer obligatoire ("Suggestion
+- [x] Script générant un dataset synthétique à partir des seuils médicaux
+      de référence (tension, fréquence cardiaque, glycémie,
+      température...) — `ml/train_constantes_model.mjs` (Node +
+      `@tensorflow/tfjs-node`, hors runtime applicatif), à la place d'un
+      script Python initialement envisagé, pour rester dans l'écosystème
+      TensorFlow.js de bout en bout
+- [x] Entraînement d'un petit modèle de classification et export au format
+      TensorFlow.js (< 50 Mo) — `frontend/public/models/constantes-model/`
+- [x] Intégration de `@tensorflow/tfjs` via CDN dans le frontend
+- [x] Chargement du modèle et inférence côté client lors de la saisie /
+      affichage des constantes — `frontend/src/ia/constantesIA.ts`
+- [x] Affichage de l'alerte avec le disclaimer obligatoire ("Suggestion
       générée automatiquement, à valider par un professionnel de santé")
-- [ ] Repli sur des règles à seuils simples si le modèle ne se charge pas
+- [x] Repli sur des règles à seuils simples si le modèle ne se charge pas
 
 **Critères d'acceptation**
-- La saisie d'une constante hors plage déclenche une alerte visuelle avec
+- [x] La saisie d'une constante hors plage déclenche une alerte visuelle avec
   disclaimer, sans appel au backend
-- Le modèle se charge en quelques secondes sur un poste standard
+- [x] Le modèle se charge en quelques secondes sur un poste standard
 
 **Dépendances** : Jalon 2 (formulaire de saisie des constantes disponible)
 

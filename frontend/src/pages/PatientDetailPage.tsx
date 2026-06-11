@@ -8,6 +8,11 @@ import {
   getPatient,
   uploadDocument,
 } from "../api/patients";
+import {
+  DISCLAIMER_IA_CONSTANTES,
+  evaluerConstante,
+  type AlerteConstante,
+} from "../ia/constantesIA";
 import type {
   PatientDetail,
   TypeAntecedent,
@@ -385,6 +390,22 @@ function ConsultationsTab({
   );
 }
 
+function ConstanteAlerte({ alerte }: { alerte: AlerteConstante }) {
+  const { plage } = alerte;
+  return (
+    <div className="ia-alert">
+      <p>
+        ⚠️ Valeur hors plage normale ({plage.normalMin}–{plage.normalMax}{" "}
+        {plage.unit})
+        {alerte.source === "modele" && alerte.probabilite !== null && (
+          <> — confiance du modèle : {Math.round(alerte.probabilite * 100)}%</>
+        )}
+      </p>
+      <p className="ia-disclaimer">{DISCLAIMER_IA_CONSTANTES}</p>
+    </div>
+  );
+}
+
 function ConstantesTab({
   patient,
   onChange,
@@ -397,6 +418,8 @@ function ConstantesTab({
   const [unite, setUnite] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [alertes, setAlertes] = useState<Record<number, AlerteConstante>>({});
+  const [previewAlerte, setPreviewAlerte] = useState<AlerteConstante | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -410,6 +433,7 @@ function ConstantesTab({
       });
       setValeur("");
       setUnite("");
+      setPreviewAlerte(null);
       onChange();
     } catch {
       setError("Impossible d'ajouter la constante");
@@ -418,6 +442,42 @@ function ConstantesTab({
     }
   }
 
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(
+      patient.constantes.map(async (c) => {
+        const alerte = await evaluerConstante(c.type, c.valeur);
+        return [c.id, alerte] as const;
+      })
+    ).then((entries) => {
+      if (cancelled) return;
+      const next: Record<number, AlerteConstante> = {};
+      for (const [id, alerte] of entries) {
+        if (alerte) next[id] = alerte;
+      }
+      setAlertes(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [patient.constantes]);
+
+  useEffect(() => {
+    const valeurNum = Number(valeur);
+    if (valeur.trim() === "" || Number.isNaN(valeurNum)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPreviewAlerte(null);
+      return;
+    }
+    let cancelled = false;
+    evaluerConstante(type, valeurNum).then((alerte) => {
+      if (!cancelled) setPreviewAlerte(alerte);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [type, valeur]);
+
   const sorted = [...patient.constantes].sort(
     (a, b) => new Date(b.date_mesure).getTime() - new Date(a.date_mesure).getTime()
   );
@@ -425,12 +485,16 @@ function ConstantesTab({
   return (
     <div>
       <ul className="record-list">
-        {sorted.map((c) => (
-          <li key={c.id}>
-            <strong>{c.type}</strong> : {c.valeur} {c.unite} —{" "}
-            {new Date(c.date_mesure).toLocaleString("fr-FR")}
-          </li>
-        ))}
+        {sorted.map((c) => {
+          const alerte = alertes[c.id];
+          return (
+            <li key={c.id}>
+              <strong>{c.type}</strong> : {c.valeur} {c.unite} —{" "}
+              {new Date(c.date_mesure).toLocaleString("fr-FR")}
+              {alerte?.anormal && <ConstanteAlerte alerte={alerte} />}
+            </li>
+          );
+        })}
         {sorted.length === 0 && <li>Aucune constante enregistrée</li>}
       </ul>
 
@@ -463,6 +527,7 @@ function ConstantesTab({
           Ajouter
         </button>
       </form>
+      {previewAlerte?.anormal && <ConstanteAlerte alerte={previewAlerte} />}
       {error && <p className="error">{error}</p>}
     </div>
   );

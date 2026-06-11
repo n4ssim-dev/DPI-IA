@@ -207,6 +207,25 @@ main {
   color: #d33;
 }
 
+.ia-alert {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e0a800;
+  background: rgba(224, 168, 0, 0.12);
+  border-radius: 6px;
+}
+
+.ia-alert p {
+  margin: 0;
+}
+
+.ia-alert .ia-disclaimer {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--text);
+}
+
 .loading {
   text-align: center;
   margin-top: 2rem;

@@ -1,0 +1,13 @@
+{
+  "name": "dpi-ia-ml",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Scripts d'entraînement des modèles IA du DPI (hors runtime applicatif)",
+  "scripts": {
+    "train:constantes": "node train_constantes_model.mjs"
+  },
+  "devDependencies": {
+    "@tensorflow/tfjs-node": "^4.22.0"
+  }
+}
