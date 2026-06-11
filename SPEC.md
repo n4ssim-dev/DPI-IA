@@ -187,6 +187,10 @@ dpi-ia/
 
 ## 12. Jalons proposés
 
+Vue d'ensemble séquentielle (chaque jalon s'appuie sur le précédent). Le
+détail de chaque jalon (tâches, critères d'acceptation, dépendances) est
+suivi dans [TODO.md](TODO.md).
+
 1. **Socle Docker** : `docker-compose.yml` (frontend, backend, db) qui démarre
 2. **Socle DPI** : fiche patient, consultations, constantes (CRUD complet, React + FastAPI)
 3. **Brique IA n°1** : alerte sur constantes anormales (TensorFlow.js, frontend)
