@@ -26,6 +26,7 @@ from app.schemas import (
     ConsultationCreate,
     ConsultationOut,
     DocumentOut,
+    DocumentUpdate,
     PatientCreate,
     PatientDetailOut,
     PatientListOut,
@@ -216,6 +217,29 @@ def upload_document(
         nom_original=file.filename or stored_name,
     )
     db.add(document)
+    db.commit()
+    db.refresh(document)
+    return document
+
+
+@router.patch(
+    "/{patient_id}/documents/{document_id}",
+    response_model=DocumentOut,
+)
+def update_document_texte(
+    patient_id: int,
+    document_id: int,
+    payload: DocumentUpdate,
+    db: Session = Depends(get_db),
+    current_user: Utilisateur = Depends(get_current_user),
+):
+    document = db.get(Document, document_id)
+    if document is None or document.patient_id != patient_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document introuvable"
+        )
+
+    document.texte_extrait = payload.texte_extrait
     db.commit()
     db.refresh(document)
     return document

@@ -107,3 +107,15 @@ export async function uploadDocument(
   );
   return res.data;
 }
+
+export async function updateDocumentTexte(
+  patientId: number,
+  documentId: number,
+  texteExtrait: string
+): Promise<DocumentMedical> {
+  const res = await apiClient.patch<DocumentMedical>(
+    `/patients/${patientId}/documents/${documentId}`,
+    { texte_extrait: texteExtrait }
+  );
+  return res.data;
+}

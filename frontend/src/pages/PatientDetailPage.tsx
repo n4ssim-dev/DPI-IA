@@ -6,6 +6,7 @@ import {
   addConstante,
   addTraitement,
   getPatient,
+  updateDocumentTexte,
   uploadDocument,
 } from "../api/patients";
 import {
@@ -13,6 +14,7 @@ import {
   evaluerConstante,
   type AlerteConstante,
 } from "../ia/constantesIA";
+import { DISCLAIMER_OCR, extraireTexte } from "../ia/ocr";
 import type {
   PatientDetail,
   TypeAntecedent,
@@ -64,6 +66,7 @@ export default function PatientDetailPage() {
   const [tab, setTab] = useState<Tab>("identite");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [ocrPrefill, setOcrPrefill] = useState<string | null>(null);
 
   async function refresh() {
     setError(null);
@@ -119,13 +122,25 @@ export default function PatientDetailPage() {
           <TraitementsTab patient={patient} onChange={refresh} />
         )}
         {tab === "consultations" && (
-          <ConsultationsTab patient={patient} onChange={refresh} />
+          <ConsultationsTab
+            patient={patient}
+            onChange={refresh}
+            prefillObservations={ocrPrefill}
+            onPrefillConsumed={() => setOcrPrefill(null)}
+          />
         )}
         {tab === "constantes" && (
           <ConstantesTab patient={patient} onChange={refresh} />
         )}
         {tab === "documents" && (
-          <DocumentsTab patient={patient} onChange={refresh} />
+          <DocumentsTab
+            patient={patient}
+            onChange={refresh}
+            onUtiliserPourConsultation={(texte) => {
+              setOcrPrefill(texte);
+              setTab("consultations");
+            }}
+          />
         )}
       </div>
     </div>
@@ -307,15 +322,27 @@ function TraitementsTab({
 function ConsultationsTab({
   patient,
   onChange,
+  prefillObservations,
+  onPrefillConsumed,
 }: {
   patient: PatientDetail;
   onChange: () => void;
+  prefillObservations: string | null;
+  onPrefillConsumed: () => void;
 }) {
   const [motif, setMotif] = useState("");
   const [observations, setObservations] = useState("");
   const [conclusion, setConclusion] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (prefillObservations === null) return;
+    setObservations((prev) =>
+      prev ? `${prev}\n${prefillObservations}` : prefillObservations
+    );
+    onPrefillConsumed();
+  }, [prefillObservations, onPrefillConsumed]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -536,14 +563,32 @@ function ConstantesTab({
 function DocumentsTab({
   patient,
   onChange,
+  onUtiliserPourConsultation,
 }: {
   patient: PatientDetail;
   onChange: () => void;
+  onUtiliserPourConsultation: (texte: string) => void;
 }) {
   const [type, setType] = useState("ordonnance");
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
+  const [ocrText, setOcrText] = useState("");
+
+  function handleFileChange(selected: File | null) {
+    setFile(selected);
+    setOcrText("");
+    setOcrProgress(0);
+    if (!selected || !selected.type.startsWith("image/")) return;
+
+    setOcrLoading(true);
+    extraireTexte(selected, setOcrProgress).then((texte) => {
+      setOcrText(texte ?? "");
+      setOcrLoading(false);
+    });
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -551,8 +596,13 @@ function DocumentsTab({
     setSubmitting(true);
     setError(null);
     try {
-      await uploadDocument(patient.id, type, file);
+      const document = await uploadDocument(patient.id, type, file);
+      if (ocrText.trim()) {
+        await updateDocumentTexte(patient.id, document.id, ocrText.trim());
+      }
       setFile(null);
+      setOcrText("");
+      setOcrProgress(0);
       onChange();
     } catch {
       setError("Impossible d'envoyer le document");
@@ -568,26 +618,61 @@ function DocumentsTab({
           <li key={d.id}>
             <strong>{d.type}</strong> — {d.nom_original} —{" "}
             {new Date(d.date_upload).toLocaleString("fr-FR")}
+            {d.texte_extrait && (
+              <div className="ia-alert">
+                <p>Texte extrait : {d.texte_extrait}</p>
+                <p className="ia-disclaimer">{DISCLAIMER_OCR}</p>
+                <button
+                  type="button"
+                  onClick={() => onUtiliserPourConsultation(d.texte_extrait!)}
+                >
+                  Utiliser pour une consultation
+                </button>
+              </div>
+            )}
           </li>
         ))}
         {patient.documents.length === 0 && <li>Aucun document</li>}
       </ul>
 
-      <form onSubmit={handleSubmit} className="inline-form">
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="ordonnance">Ordonnance</option>
-          <option value="compte_rendu">Compte-rendu</option>
-          <option value="resultat_analyse">Résultat d'analyse</option>
-          <option value="autre">Autre</option>
-        </select>
-        <input
-          type="file"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          required
-        />
-        <button type="submit" disabled={submitting || !file}>
-          Envoyer
-        </button>
+      <form onSubmit={handleSubmit} className="stack-form">
+        <div className="inline-form">
+          <select value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="ordonnance">Ordonnance</option>
+            <option value="compte_rendu">Compte-rendu</option>
+            <option value="resultat_analyse">Résultat d'analyse</option>
+            <option value="autre">Autre</option>
+          </select>
+          <input
+            type="file"
+            accept="image/*,application/pdf"
+            onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+            required
+          />
+          <button type="submit" disabled={submitting || !file || ocrLoading}>
+            Envoyer
+          </button>
+        </div>
+
+        {ocrLoading && (
+          <p>Reconnaissance du texte en cours… {Math.round(ocrProgress * 100)}%</p>
+        )}
+
+        {!ocrLoading && ocrText && (
+          <div className="ia-alert">
+            <label htmlFor="ocr-texte">Texte extrait (modifiable)</label>
+            <textarea
+              id="ocr-texte"
+              value={ocrText}
+              onChange={(e) => setOcrText(e.target.value)}
+              rows={5}
+            />
+            <p className="ia-disclaimer">{DISCLAIMER_OCR}</p>
+            <button type="button" onClick={() => onUtiliserPourConsultation(ocrText)}>
+              Utiliser pour une consultation
+            </button>
+          </div>
+        )}
       </form>
       {error && <p className="error">{error}</p>}
     </div>

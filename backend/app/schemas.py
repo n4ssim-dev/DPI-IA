@@ -110,6 +110,10 @@ class DocumentOut(BaseModel):
     date_upload: datetime
 
 
+class DocumentUpdate(BaseModel):
+    texte_extrait: str
+
+
 # --- Consultation ---
 
 

@@ -110,17 +110,17 @@ côté client, conformément à
 champs, conformément à
 [SPEC.md, section 5.2](SPEC.md#52-modules-ia-rudimentaires).
 
-- [ ] Intégration de Tesseract.js via CDN
-- [ ] Lancement de l'OCR côté client après upload d'un document
+- [x] Intégration de Tesseract.js via CDN
+- [x] Lancement de l'OCR côté client après upload d'un document
       (image / PDF)
-- [ ] Affichage du texte extrait et proposition de pré-remplissage de
+- [x] Affichage du texte extrait et proposition de pré-remplissage de
       champs (ex. motif, observations)
-- [ ] Sauvegarde du texte extrait (`texte_extrait`) via l'API, associé au
+- [x] Sauvegarde du texte extrait (`texte_extrait`) via l'API, associé au
       document
-- [ ] Disclaimer sur la fiabilité de l'extraction
+- [x] Disclaimer sur la fiabilité de l'extraction
 
 **Critères d'acceptation**
-- L'upload d'un document de test produit un texte extrait affiché à
+- [x] L'upload d'un document de test produit un texte extrait affiché à
   l'utilisateur et persisté en base
 
 **Dépendances** : Jalon 2 (upload de documents disponible)
