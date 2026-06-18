@@ -231,6 +231,37 @@ main {
   margin-top: 2rem;
 }
 
+/* Tendance */
+.tendance-panel {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.tendance-panel h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.tendance-resultat {
+  margin-top: 0.75rem;
+}
+
+.tendance-resultat canvas {
+  max-width: 100%;
+}
+
+.tendance-verdict {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 0.9rem;
+}
+
+.tendance-suggestion {
+  margin: 0 0 0.25rem;
+  font-size: 0.88rem;
+}
+
 /* Dictée vocale */
 .dictee-indisponible {
   font-size: 0.85rem;

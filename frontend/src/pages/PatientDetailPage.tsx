@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   addAntecedent,
@@ -6,6 +6,7 @@ import {
   addConstante,
   addTraitement,
   getPatient,
+  getTendance,
   updateDocumentTexte,
   uploadDocument,
 } from "../api/patients";
@@ -18,6 +19,7 @@ import { DISCLAIMER_OCR, extraireTexte } from "../ia/ocr";
 import { useDictee } from "../ia/useDictee";
 import type {
   PatientDetail,
+  TendanceResult,
   TypeAntecedent,
   TypeConstante,
 } from "../types";
@@ -456,6 +458,144 @@ function ConsultationsTab({
   );
 }
 
+// ---- Chart.js (CDN) minimal global declaration ----
+interface ChartInstance {
+  destroy(): void;
+}
+declare global {
+  interface Window {
+    Chart: new (
+      ctx: HTMLCanvasElement,
+      config: {
+        type: string;
+        data: object;
+        options?: object;
+      }
+    ) => ChartInstance;
+  }
+}
+
+const DISCLAIMER_TENDANCE =
+  "Analyse générée automatiquement par régression linéaire, à interpréter par un professionnel de santé.";
+
+const TENDANCE_LABEL: Record<string, string> = {
+  hausse: "↑ Tendance à la hausse",
+  baisse: "↓ Tendance à la baisse",
+  stable: "→ Valeurs stables",
+};
+
+function TendancePanel({
+  patientId,
+  typesDisponibles,
+}: {
+  patientId: number;
+  typesDisponibles: TypeConstante[];
+}) {
+  const [type, setType] = useState<TypeConstante>(typesDisponibles[0]);
+  const [resultat, setResultat] = useState<TendanceResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const chartRef = useRef<ChartInstance | null>(null);
+
+  const analyser = useCallback(async () => {
+    setLoading(true);
+    setErreur(null);
+    setResultat(null);
+    try {
+      const data = await getTendance(patientId, type);
+      setResultat(data);
+    } catch (err: unknown) {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      setErreur(detail ?? "Impossible de calculer la tendance.");
+    } finally {
+      setLoading(false);
+    }
+  }, [patientId, type]);
+
+  useEffect(() => {
+    if (!resultat || !canvasRef.current || !window.Chart) return;
+
+    chartRef.current?.destroy();
+    chartRef.current = new window.Chart(canvasRef.current, {
+      type: "line",
+      data: {
+        labels: resultat.points.map((p) =>
+          new Date(p.date).toLocaleDateString("fr-FR")
+        ),
+        datasets: [
+          {
+            label: resultat.type,
+            data: resultat.points.map((p) => p.valeur),
+            borderColor: "#2563eb",
+            backgroundColor: "rgba(37,99,235,0.08)",
+            tension: 0.3,
+            pointRadius: 4,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { maxTicksLimit: 6 } },
+          y: { beginAtZero: false },
+        },
+      },
+    });
+
+    return () => {
+      chartRef.current?.destroy();
+      chartRef.current = null;
+    };
+  }, [resultat]);
+
+  if (typesDisponibles.length === 0) return null;
+
+  const tendanceCouleur =
+    resultat?.tendance === "hausse"
+      ? "#d97706"
+      : resultat?.tendance === "baisse"
+        ? "#2563eb"
+        : "#16a34a";
+
+  return (
+    <div className="tendance-panel">
+      <h4>Analyse de tendance</h4>
+      <div className="inline-form">
+        <select value={type} onChange={(e) => setType(e.target.value as TypeConstante)}>
+          {typesDisponibles.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+        <button type="button" onClick={analyser} disabled={loading}>
+          {loading ? "Analyse…" : "Analyser"}
+        </button>
+      </div>
+
+      {erreur && <p className="error">{erreur}</p>}
+
+      {resultat && (
+        <div className="tendance-resultat">
+          <canvas ref={canvasRef} height={160} />
+          <p className="tendance-verdict" style={{ color: tendanceCouleur }}>
+            <strong>{TENDANCE_LABEL[resultat.tendance]}</strong>
+            {" — "}
+            {resultat.n_points} mesure{resultat.n_points > 1 ? "s" : ""}, confiance{" "}
+            {Math.round(resultat.confiance * 100)}%
+          </p>
+          <p className="tendance-suggestion">{resultat.suggestion}</p>
+          <p className="ia-disclaimer">{DISCLAIMER_TENDANCE}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ConstanteAlerte({ alerte }: { alerte: AlerteConstante }) {
   const { plage } = alerte;
   return (
@@ -595,6 +735,13 @@ function ConstantesTab({
       </form>
       {previewAlerte?.anormal && <ConstanteAlerte alerte={previewAlerte} />}
       {error && <p className="error">{error}</p>}
+
+      <TendancePanel
+        patientId={patient.id}
+        typesDisponibles={[
+          ...new Set(patient.constantes.map((c) => c.type)),
+        ] as TypeConstante[]}
+      />
     </div>
   );
 }

@@ -191,10 +191,10 @@ def add_constante(
     return constante
 
 
-_SEUIL_RELATIF = 0.005
-"""Pente relative (par jour / valeur moyenne) au-dessus de laquelle on parle
-de hausse ou de baisse. 0.5 % par jour est un seuil cliniquement perceptible
-sur une semaine."""
+_SEUIL_DELTA_TOTAL = 0.05
+"""Variation relative totale (pente × durée_jours / moyenne) au-dessus de
+laquelle on parle de hausse ou de baisse. 5 % sur l'ensemble de la période
+observée est cliniquement perceptible."""
 
 _MESSAGES: dict[str, dict[str, str]] = {
     "hausse": {
@@ -261,11 +261,12 @@ def get_tendance(
     confiance: float = float(max(0.0, r2_score(y, y_pred)))
 
     mean_val = float(np.mean(y)) or 1.0
-    pente_relative = pente / mean_val
+    duree_jours = float(X[-1, 0] - X[0, 0]) or 1.0
+    delta_total_relatif = (pente * duree_jours) / mean_val
 
-    if pente_relative > _SEUIL_RELATIF:
+    if delta_total_relatif > _SEUIL_DELTA_TOTAL:
         tendance = "hausse"
-    elif pente_relative < -_SEUIL_RELATIF:
+    elif delta_total_relatif < -_SEUIL_DELTA_TOTAL:
         tendance = "baisse"
     else:
         tendance = "stable"

@@ -153,19 +153,19 @@ des consultations, conformément à
 l'endpoint `GET /patients/{id}/constantes/tendance`
 ([SPEC.md, section 8](SPEC.md#8-aperçu-de-lapi-fastapi)).
 
-- [ ] Endpoint `GET /patients/{id}/constantes/tendance` (FastAPI)
-- [ ] Calcul d'une régression linéaire simple (numpy / scikit-learn) sur
+- [x] Endpoint `GET /patients/{id}/constantes/tendance` (FastAPI)
+- [x] Calcul d'une régression linéaire simple (numpy / scikit-learn) sur
       l'historique d'une constante donnée
-- [ ] Retour de la pente, de la tendance (hausse / baisse / stable), d'un
+- [x] Retour de la pente, de la tendance (hausse / baisse / stable), d'un
       indice de confiance et d'un message de suggestion
-- [ ] Frontend : graphique d'évolution de la constante + affichage de la
+- [x] Frontend : graphique d'évolution de la constante + affichage de la
       tendance avec disclaimer
-- [ ] Persistance optionnelle de la suggestion dans `suggestions_ia`
+- [x] Persistance optionnelle de la suggestion dans `suggestions_ia`
 
 **Critères d'acceptation**
-- Pour un patient avec au moins 3 mesures d'une même constante, l'endpoint
+- [x] Pour un patient avec au moins 3 mesures d'une même constante, l'endpoint
   retourne une tendance cohérente
-- L'UI affiche un graphique et un message de tendance avec disclaimer
+- [x] L'UI affiche un graphique et un message de tendance avec disclaimer
 
 **Dépendances** : Jalon 2 (historique des constantes disponible)
 
