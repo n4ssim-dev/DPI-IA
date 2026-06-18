@@ -1,0 +1,60 @@
+{
+  "types": [
+    "tension_systolique",
+    "tension_diastolique",
+    "frequence_cardiaque",
+    "temperature",
+    "glycemie",
+    "saturation_o2"
+  ],
+  "ranges": {
+    "tension_systolique": {
+      "label": "Tension systolique",
+      "unit": "mmHg",
+      "min": 60,
+      "max": 220,
+      "normalMin": 90,
+      "normalMax": 140
+    },
+    "tension_diastolique": {
+      "label": "Tension diastolique",
+      "unit": "mmHg",
+      "min": 30,
+      "max": 140,
+      "normalMin": 60,
+      "normalMax": 90
+    },
+    "frequence_cardiaque": {
+      "label": "Fréquence cardiaque",
+      "unit": "bpm",
+      "min": 30,
+      "max": 200,
+      "normalMin": 60,
+      "normalMax": 100
+    },
+    "temperature": {
+      "label": "Température",
+      "unit": "°C",
+      "min": 34,
+      "max": 42,
+      "normalMin": 36.1,
+      "normalMax": 37.8
+    },
+    "glycemie": {
+      "label": "Glycémie",
+      "unit": "g/L",
+      "min": 0.2,
+      "max": 4,
+      "normalMin": 0.7,
+      "normalMax": 1.1
+    },
+    "saturation_o2": {
+      "label": "Saturation en oxygène",
+      "unit": "%",
+      "min": 70,
+      "max": 100,
+      "normalMin": 95,
+      "normalMax": 100
+    }
+  }
+}

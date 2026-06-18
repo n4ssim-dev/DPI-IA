@@ -153,13 +153,20 @@ dpi-ia/
 ├── docker-compose.yml
 ├── frontend/        # React (Vite + TS)
 │   └── Dockerfile
-├── backend/         # FastAPI
-│   ├── Dockerfile
-│   └── app/
-└── db/
-    ├── init.sql     # création du schéma
-    └── seed.sql     # patients/consultations/constantes fictifs (chargé au démarrage)
+└── backend/         # FastAPI
+    ├── Dockerfile
+    ├── entrypoint.sh   # alembic upgrade head && seed && uvicorn
+    ├── alembic/         # migrations (schéma généré depuis les modèles SQLAlchemy)
+    └── app/
+        ├── models.py    # source de vérité du schéma de données
+        └── seed.py      # jeu de données fictif (patients, consultations, constantes...),
+                          # idempotent, exécuté au démarrage du conteneur backend
 ```
+
+Le schéma de la base est géré par les migrations Alembic (générées depuis les
+modèles SQLAlchemy) et le jeu de données de démonstration par un script Python
+idempotent, plutôt que par des fichiers `db/init.sql` / `db/seed.sql` exécutés
+par l'image Postgres.
 
 ## 10. Exigences non fonctionnelles
 
@@ -186,6 +193,10 @@ dpi-ia/
 - Déploiement cloud / mise en production
 
 ## 12. Jalons proposés
+
+Vue d'ensemble séquentielle (chaque jalon s'appuie sur le précédent). Le
+détail de chaque jalon (tâches, critères d'acceptation, dépendances) est
+suivi dans [TODO.md](TODO.md).
 
 1. **Socle Docker** : `docker-compose.yml` (frontend, backend, db) qui démarre
 2. **Socle DPI** : fiche patient, consultations, constantes (CRUD complet, React + FastAPI)
