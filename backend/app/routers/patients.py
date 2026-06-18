@@ -1,7 +1,10 @@
 import os
 import uuid
 
+import numpy as np
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
@@ -30,6 +33,7 @@ from app.schemas import (
     PatientCreate,
     PatientDetailOut,
     PatientListOut,
+    TendanceOut,
     TraitementEnCoursCreate,
     TraitementEnCoursOut,
 )
@@ -185,6 +189,110 @@ def add_constante(
     db.commit()
     db.refresh(constante)
     return constante
+
+
+_SEUIL_RELATIF = 0.005
+"""Pente relative (par jour / valeur moyenne) au-dessus de laquelle on parle
+de hausse ou de baisse. 0.5 % par jour est un seuil cliniquement perceptible
+sur une semaine."""
+
+_MESSAGES: dict[str, dict[str, str]] = {
+    "hausse": {
+        "tension_systolique": "Tendance à la hausse de la tension systolique. Surveillance accrue recommandée.",
+        "tension_diastolique": "Tendance à la hausse de la tension diastolique. Surveillance accrue recommandée.",
+        "frequence_cardiaque": "Fréquence cardiaque en augmentation. Évaluation cardiologique conseillée.",
+        "temperature": "Tendance à la hausse de la température. Surveiller l'apparition d'une infection.",
+        "glycemie": "Glycémie en hausse. Réévaluation du suivi diabétique recommandée.",
+        "saturation_o2": "Saturation en oxygène en légère hausse — tendance favorable.",
+        "_defaut": "Tendance à la hausse détectée.",
+    },
+    "baisse": {
+        "tension_systolique": "Tendance à la baisse de la tension systolique. Risque d'hypotension à surveiller.",
+        "tension_diastolique": "Tendance à la baisse de la tension diastolique. Évaluation clinique conseillée.",
+        "frequence_cardiaque": "Fréquence cardiaque en diminution. Évaluation cardiologique conseillée.",
+        "temperature": "Tendance à la baisse de la température. Hypothermie à surveiller.",
+        "glycemie": "Glycémie en baisse. Risque hypoglycémique à évaluer.",
+        "saturation_o2": "Saturation en oxygène en baisse. Surveillance respiratoire renforcée recommandée.",
+        "_defaut": "Tendance à la baisse détectée.",
+    },
+    "stable": {
+        "_defaut": "Les valeurs sont stables sur la période analysée.",
+    },
+}
+
+
+def _suggestion(type_cst: str, tendance: str) -> str:
+    pool = _MESSAGES.get(tendance, {})
+    return pool.get(type_cst, pool.get("_defaut", ""))
+
+
+@router.get("/{patient_id}/constantes/tendance", response_model=TendanceOut)
+def get_tendance(
+    patient_id: int,
+    type: str,
+    db: Session = Depends(get_db),
+    current_user: Utilisateur = Depends(get_current_user),
+):
+    get_patient_or_404(patient_id, db)
+
+    rows = (
+        db.execute(
+            select(Constante)
+            .where(Constante.patient_id == patient_id, Constante.type == type)
+            .order_by(Constante.date_mesure)
+        )
+        .scalars()
+        .all()
+    )
+
+    if len(rows) < 3:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Au moins 3 mesures de type '{type}' sont nécessaires pour calculer une tendance (actuellement : {len(rows)}).",
+        )
+
+    t0 = rows[0].date_mesure.timestamp()
+    X = np.array([(r.date_mesure.timestamp() - t0) / 86400 for r in rows]).reshape(-1, 1)
+    y = np.array([r.valeur for r in rows])
+
+    model = LinearRegression().fit(X, y)
+    pente: float = float(model.coef_[0])
+    y_pred = model.predict(X)
+    confiance: float = float(max(0.0, r2_score(y, y_pred)))
+
+    mean_val = float(np.mean(y)) or 1.0
+    pente_relative = pente / mean_val
+
+    if pente_relative > _SEUIL_RELATIF:
+        tendance = "hausse"
+    elif pente_relative < -_SEUIL_RELATIF:
+        tendance = "baisse"
+    else:
+        tendance = "stable"
+
+    suggestion = _suggestion(type, tendance)
+
+    from app.models import SuggestionIA
+
+    db.add(
+        SuggestionIA(
+            patient_id=patient_id,
+            type=f"tendance_{type}",
+            contenu=suggestion,
+            confiance=confiance,
+        )
+    )
+    db.commit()
+
+    return TendanceOut(
+        type=type,
+        n_points=len(rows),
+        pente=pente,
+        tendance=tendance,
+        confiance=confiance,
+        suggestion=suggestion,
+        points=[{"date": r.date_mesure, "valeur": r.valeur} for r in rows],
+    )
 
 
 @router.post(

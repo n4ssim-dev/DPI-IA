@@ -15,6 +15,7 @@ import {
   type AlerteConstante,
 } from "../ia/constantesIA";
 import { DISCLAIMER_OCR, extraireTexte } from "../ia/ocr";
+import { useDictee } from "../ia/useDictee";
 import type {
   PatientDetail,
   TypeAntecedent,
@@ -336,6 +337,10 @@ function ConsultationsTab({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const dictee = useDictee((texte) =>
+    setObservations((prev) => (prev ? `${prev} ${texte}` : texte))
+  );
+
   useEffect(() => {
     if (prefillObservations === null) return;
     setObservations((prev) =>
@@ -391,6 +396,13 @@ function ConsultationsTab({
         {sorted.length === 0 && <li>Aucune consultation</li>}
       </ul>
 
+      {!dictee.supporte && (
+        <p className="dictee-indisponible">
+          La dictée vocale n'est pas disponible dans ce navigateur. Essayez
+          Chrome ou Edge.
+        </p>
+      )}
+
       <form onSubmit={handleSubmit} className="stack-form">
         <input
           placeholder="Motif"
@@ -398,11 +410,38 @@ function ConsultationsTab({
           onChange={(e) => setMotif(e.target.value)}
           required
         />
-        <textarea
-          placeholder="Observations"
-          value={observations}
-          onChange={(e) => setObservations(e.target.value)}
-        />
+
+        <div className="dictee-field">
+          <div className="dictee-header">
+            <span>Observations</span>
+            {dictee.supporte && (
+              <button
+                type="button"
+                className={dictee.ecoute ? "dictee-btn dictee-btn--actif" : "dictee-btn"}
+                onClick={dictee.basculer}
+                aria-label={dictee.ecoute ? "Arrêter la dictée" : "Dicter les observations"}
+              >
+                <span className="dictee-micro">🎙</span>
+                {dictee.ecoute ? " Arrêter" : " Dicter"}
+              </button>
+            )}
+          </div>
+          <textarea
+            placeholder="Observations"
+            value={observations}
+            onChange={(e) => setObservations(e.target.value)}
+          />
+          {dictee.ecoute && (
+            <p className="dictee-ecoute">
+              <span className="dictee-pulse" /> Enregistrement en cours…
+              {dictee.transitoire && (
+                <em className="dictee-transitoire"> {dictee.transitoire}</em>
+              )}
+            </p>
+          )}
+          {dictee.erreur && <p className="error">{dictee.erreur}</p>}
+        </div>
+
         <textarea
           placeholder="Conclusion"
           value={conclusion}

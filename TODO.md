@@ -131,17 +131,17 @@ champs, conformément à
 consultation, conformément à
 [SPEC.md, section 5.2](SPEC.md#52-modules-ia-rudimentaires).
 
-- [ ] Intégration de la Web Speech API (`SpeechRecognition`) dans le
+- [x] Intégration de la Web Speech API (`SpeechRecognition`) dans le
       formulaire de consultation
-- [ ] Bouton de dictée avec retour visuel (enregistrement en cours)
-- [ ] Insertion du texte transcrit dans le champ observations, modifiable
+- [x] Bouton de dictée avec retour visuel (enregistrement en cours)
+- [x] Insertion du texte transcrit dans le champ observations, modifiable
       avant sauvegarde
-- [ ] Message de repli si le navigateur ne supporte pas l'API
+- [x] Message de repli si le navigateur ne supporte pas l'API
 
 **Critères d'acceptation**
-- Le soignant peut dicter du texte qui apparaît dans le champ observations
+- [x] Le soignant peut dicter du texte qui apparaît dans le champ observations
   et reste éditable
-- Un message clair s'affiche en cas de navigateur incompatible
+- [x] Un message clair s'affiche en cas de navigateur incompatible
 
 **Dépendances** : Jalon 2 (formulaire de consultation disponible)
 

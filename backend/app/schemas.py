@@ -96,6 +96,27 @@ class ConstanteOut(BaseModel):
     consultation_id: int | None
 
 
+# --- Tendance ---
+
+
+class PointConstante(BaseModel):
+    date: datetime
+    valeur: float
+
+
+class TendanceOut(BaseModel):
+    type: str
+    n_points: int
+    pente: float
+    """Pente en unités / jour."""
+    tendance: str
+    """'hausse' | 'baisse' | 'stable'"""
+    confiance: float
+    """Coefficient de détermination R² ∈ [0, 1]."""
+    suggestion: str
+    points: list[PointConstante]
+
+
 # --- Document ---
 
 

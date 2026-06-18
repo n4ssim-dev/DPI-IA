@@ -6,6 +6,7 @@ import type {
   DocumentMedical,
   PatientDetail,
   PatientListItem,
+  TendanceResult,
   TraitementEnCours,
   TypeAntecedent,
   TypeConstante,
@@ -103,6 +104,17 @@ export async function uploadDocument(
   const res = await apiClient.post<DocumentMedical>(
     `/patients/${patientId}/documents`,
     formData,
+    { params: { type } }
+  );
+  return res.data;
+}
+
+export async function getTendance(
+  patientId: number,
+  type: TypeConstante
+): Promise<TendanceResult> {
+  const res = await apiClient.get<TendanceResult>(
+    `/patients/${patientId}/constantes/tendance`,
     { params: { type } }
   );
   return res.data;

@@ -70,6 +70,21 @@ export interface PatientListItem {
   sexe: string;
 }
 
+export interface PointConstante {
+  date: string;
+  valeur: number;
+}
+
+export interface TendanceResult {
+  type: string;
+  n_points: number;
+  pente: number;
+  tendance: "hausse" | "baisse" | "stable";
+  confiance: number;
+  suggestion: string;
+  points: PointConstante[];
+}
+
 export interface PatientDetail extends PatientListItem {
   telephone: string | null;
   email: string | null;
