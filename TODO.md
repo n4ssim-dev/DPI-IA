@@ -175,19 +175,21 @@ l'endpoint `GET /patients/{id}/constantes/tendance`
 retours des utilisateurs cibles
 ([SPEC.md, section 3](SPEC.md#3-utilisateurs-cibles)).
 
-- [ ] Enrichissement du `db/seed.sql` pour couvrir tous les cas d'usage IA
+- [x] Enrichissement du `db/seed.sql` pour couvrir tous les cas d'usage IA
       (constantes anormales, documents OCRisables, historique permettant
-      une tendance)
-- [ ] Rédaction d'un scénario de démo (parcours type par rôle)
-- [ ] Vérification end-to-end de `docker compose up` sur un poste propre
-- [ ] Documentation utilisateur (README, captures d'écran)
+      une tendance) — enrichissement dans `app/seed.py`
+- [x] Rédaction d'un scénario de démo (parcours type par rôle) — voir
+      [DEMO.md](DEMO.md)
+- [x] Vérification end-to-end de `docker compose up` sur un poste propre
+- [x] Documentation utilisateur (README mis à jour avec comptes, fonctions
+      IA, structure, instructions de reset)
 - [ ] Session de démonstration et collecte des retours (médecin,
       coordinateur, admin)
 - [ ] Compte-rendu des retours et backlog pour les
       [extensions futures (V2), SPEC.md section 14](SPEC.md#14-extensions-futures-v2)
 
 **Critères d'acceptation**
-- La démo est reproductible en une commande sur une machine vierge
-- Les retours utilisateurs sont documentés et priorisés
+- [x] La démo est reproductible en une commande sur une machine vierge
+- [ ] Les retours utilisateurs sont documentés et priorisés
 
 **Dépendances** : Jalons 1 à 6
