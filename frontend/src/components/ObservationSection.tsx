@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore – vis-timeline types are bundled but the path alias isn't always resolved
-import { Timeline, Graph2d, DataSet } from 'vis-timeline/standalone';
+// @ts-ignore – direct ESM path bypasses the exports map for Vite compatibility
+import { Timeline, Graph2d, DataSet } from 'vis-timeline/dist/vis-timeline-graph2d.esm.js';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 import type { Antecedent, Consultation, PatientDetail, TraitementEnCours, TypeConstante } from '../types';
 
