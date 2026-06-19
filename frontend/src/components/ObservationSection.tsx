@@ -1,8 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore – direct ESM path bypasses the exports map for Vite compatibility
-import { Timeline, Graph2d, DataSet } from 'vis-timeline/dist/vis-timeline-graph2d.esm.js';
-import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
+// vis-timeline is loaded via CDN (index.html) and exposed as window.vis
+declare global {
+  interface Window {
+    vis: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Timeline: new (container: HTMLElement, items: any, groups: any, options?: any) => any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Graph2d: new (container: HTMLElement, items: any, groups: any, options?: any) => any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      DataSet: new (items?: any[]) => any;
+    };
+  }
+}
 import type { Antecedent, Consultation, PatientDetail, TraitementEnCours, TypeConstante } from '../types';
 
 type SelectedItem =
@@ -91,16 +100,16 @@ export default function ObservationSection({ patient }: { patient: PatientDetail
       });
     }
 
-    const tlGroups = new DataSet([
+    const tlGroups = new window.vis.DataSet([
       { id: 'consultations', content: 'Consultations' },
       { id: 'antecedents', content: 'Antécédents' },
       { id: 'traitements', content: 'Traitements' },
     ]);
 
     tlRef.current?.destroy();
-    const tl: InstanceType<typeof Timeline> = new Timeline(
+    const tl = new window.vis.Timeline(
       tlContainerRef.current,
-      new DataSet(tlItems),
+      new window.vis.DataSet(tlItems),
       tlGroups,
       {
         height: '220px',
@@ -125,10 +134,10 @@ export default function ObservationSection({ patient }: { patient: PatientDetail
         group: c.type,
       }));
 
-      const ds = new DataSet(itemsForGraph);
+      const ds = new window.vis.DataSet(itemsForGraph);
       g2dItemsDs.current = ds;
 
-      const g2dGroups = new DataSet(
+      const g2dGroups = new window.vis.DataSet(
         currentAvailableTypes.map((type) => ({
           id: type,
           content: CONSTANTE_LABELS[type] ?? type,
@@ -141,7 +150,7 @@ export default function ObservationSection({ patient }: { patient: PatientDetail
       );
 
       g2dRef.current?.destroy();
-      const g2d: InstanceType<typeof Graph2d> = new Graph2d(
+      const g2d = new window.vis.Graph2d(
         g2dContainerRef.current,
         ds,
         g2dGroups,
