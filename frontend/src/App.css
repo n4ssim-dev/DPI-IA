@@ -332,3 +332,124 @@ main {
   font-style: italic;
   opacity: 0.7;
 }
+
+/* ── ObservationSection ─────────────────────────────────────────────────── */
+
+.obs-section {
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  background: var(--bg-card, #fff);
+}
+
+.obs-title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.obs-empty {
+  color: var(--text-muted, #6b7280);
+  font-style: italic;
+}
+
+/* vis-timeline overrides: color-code the three groups */
+.obs-timeline .vis-item.vis-point[data-group="consultations"] .vis-item-overflow,
+.obs-timeline .vis-item[data-group="consultations"] {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+  color: #1e40af;
+}
+.obs-timeline .vis-item[data-group="antecedents"] {
+  border-color: #d97706;
+  background-color: #fffbeb;
+  color: #92400e;
+}
+.obs-timeline .vis-item[data-group="traitements"] {
+  border-color: #16a34a;
+  background-color: #f0fdf4;
+  color: #14532d;
+}
+
+/* Graph2d toggle buttons */
+.obs-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0.5rem;
+}
+
+.obs-toggle {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: 2px solid var(--toggle-color, #6b7280);
+  background: transparent;
+  color: var(--toggle-color, #6b7280);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.obs-toggle--active {
+  background: var(--toggle-color, #6b7280);
+  color: #fff;
+}
+
+/* Detail panel */
+.obs-detail {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-subtle, #f9fafb);
+}
+
+.obs-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.obs-detail-kind {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #6b7280);
+}
+
+.obs-detail-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-muted, #6b7280);
+  padding: 0 0.25rem;
+}
+
+.obs-dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.obs-dl dt {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.obs-dl dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.obs-dl-constantes {
+  margin: 0;
+  padding-left: 1rem;
+  list-style: disc;
+}

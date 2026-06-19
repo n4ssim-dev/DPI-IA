@@ -43,6 +43,20 @@ docker compose up
 Toutes les suggestions IA sont accompagnées d'un disclaimer
 *"à valider par un professionnel de santé"*.
 
+## Vue d'ensemble clinique (vis.js)
+
+En tête de chaque dossier patient, une section **Vue d'ensemble** affiche :
+
+- **Timeline** — frise chronologique des consultations (points), antécédents
+  (points) et traitements (plages `date_début → date_fin`) sur trois groupes
+  colorés. Cliquer sur un élément ouvre un panneau de détail.
+- **Graph2d** — courbes des constantes vitales (tension, glycémie, poids…)
+  avec boutons toggle par type. La plage temporelle est synchronisée avec
+  la timeline : naviguer sur l'une déplace l'autre.
+
+vis-timeline est chargé via CDN (jsDelivr), sans impact sur le bundle
+applicatif.
+
 ## Données de démonstration
 
 La base est pré-remplie au démarrage par `backend/app/seed.py` avec
@@ -74,6 +88,7 @@ backend/          FastAPI + SQLAlchemy + Alembic
     seed.py       données de démonstration
 frontend/         React + Vite + TypeScript
   src/
+    components/   composants réutilisables (ObservationSection…)
     ia/           briques IA (constantesIA.ts, ocr.ts, useDictee.ts)
     pages/        écrans (PatientDetailPage, LoginPage, …)
     api/          appels HTTP axios

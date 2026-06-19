@@ -193,3 +193,50 @@ retours des utilisateurs cibles
 - [ ] Les retours utilisateurs sont documentés et priorisés
 
 **Dépendances** : Jalons 1 à 6
+
+## Jalon 8 — Section Observation (vis.js)
+
+**Objectif** : offrir une vue synthétique et interactive de l'historique clinique
+du patient en tête du dossier, combinant une frise chronologique et des courbes
+de constantes vitales via la librairie vis.js.
+
+### Dépendances npm
+- [x] Installer `vis-timeline` et `vis-data` dans `frontend/`
+
+### Composant `ObservationSection`
+- [x] Créer `frontend/src/components/ObservationSection.tsx`
+- [x] Intégrer le composant **au-dessus** de la `<nav className="tabs">` dans
+      `PatientDetailPage.tsx`
+
+### Timeline vis.js (partie haute, ~200 px)
+- [x] 3 groupes de couleurs distinctes : **Consultations** | **Antécédents** | **Traitements**
+- [x] Items Consultations : points temporels positionnés à `consultation.date`,
+      libellé = `motif`
+- [x] Items Antécédents : points temporels positionnés à `antecedent.created_at`,
+      libellé = `type — description`
+- [x] Items Traitements : plages temporelles de `date_debut` à `date_fin`
+      (ou aujourd'hui si le traitement est toujours actif), libellé = `nom_medicament`
+- [x] Clic sur un item → sélection et affichage du panneau de détail
+
+### Graph2d vis.js (partie basse, ~200 px)
+- [x] Un dataset par type de constante présente chez le patient
+- [x] Boutons toggle pour afficher / masquer chaque type de constante
+- [x] Plage temporelle **synchronisée** avec la Timeline via l'événement
+      `rangechanged` (les deux visualisations bougent ensemble)
+
+### Panneau de détail (conditionnel)
+- [x] Apparaît sous les visualisations au clic sur un item Timeline
+- [x] **Consultation** : date, soignant, motif, observations, conclusion, constantes liées
+- [x] **Antécédent** : type, description
+- [x] **Traitement** : médicament, posologie, période
+- [x] Bouton « Fermer » pour masquer le panneau
+
+**Critères d'acceptation**
+- [x] La Timeline affiche les trois groupes avec des couleurs distinctes et
+  les items correctement positionnés dans le temps
+- [x] Cliquer sur un item ouvre le panneau de détail sans changer d'onglet
+- [x] Le Graph2d affiche les courbes des constantes et reste synchronisé avec
+  la fenêtre temporelle de la Timeline
+- [x] La section s'affiche sans erreur quand le patient n'a aucune donnée
+
+**Dépendances** : Jalon 2 (données patients disponibles)
