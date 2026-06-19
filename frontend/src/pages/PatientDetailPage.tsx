@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
-import ObservationSection from "../components/ObservationSection";
+
+const ObservationSection = lazy(() => import("../components/ObservationSection"));
 import {
   addAntecedent,
   addConsultation,
@@ -105,7 +106,9 @@ export default function PatientDetailPage() {
         Né(e) le {patient.date_naissance} — {patient.sexe}
       </p>
 
-      <ObservationSection patient={patient} />
+      <Suspense fallback={<p className="loading">Chargement de la vue d'ensemble…</p>}>
+        <ObservationSection patient={patient} />
+      </Suspense>
 
       <nav className="tabs">
         {TABS.map((t) => (
