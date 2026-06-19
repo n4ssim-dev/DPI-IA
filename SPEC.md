@@ -109,6 +109,7 @@ appel serveur) et **côté serveur** (FastAPI, calcul léger Python).
 |-----------|-------|-------|
 | Frontend | **React** (Vite + TypeScript) | SPA, appels API via `fetch`/`axios` |
 | Composants IA client | `tensorflow.js`, `tesseract.js`, Web Speech API (CDN/native) | Pas de build lourd, chargement dynamique |
+| Visualisation clinique | `vis-timeline` (CDN jsDelivr) | Timeline + Graph2d dans la section Vue d'ensemble |
 | Backend | **FastAPI** (Python 3.11+) | API REST, validation via Pydantic |
 | ML léger backend | `numpy`, `scikit-learn` | Calcul de tendance (régression linéaire) sur les constantes |
 | Base de données | **PostgreSQL** | via `SQLAlchemy` + `Alembic` pour les migrations |
@@ -205,6 +206,7 @@ suivi dans [TODO.md](TODO.md).
 5. **Brique IA n°3** : dictée vocale (Web Speech API, frontend)
 6. **Brique IA n°4** : détection de tendance sur les constantes (numpy/scikit-learn, backend)
 7. **Démo & retours utilisateurs**
+8. **Section Observation** : vue d'ensemble clinique (vis-timeline CDN — Timeline + Graph2d)
 
 ## 13. Décisions de conception
 
